@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 
 df = pd.read_csv("../data/cleandata.csv")
+items = [str(i) for i in df['Region'].unique()]
+items.append("all")
 app = Dash()
 displaySettingsText = '''
 ## Display Settings  
@@ -22,7 +24,7 @@ app.layout = html.Div(children=[
     html.Div(children=[
         dcc.Markdown(id="markdown", children=displaySettingsText),
         html.Label("Filter by Region"),
-        dcc.RadioItems([str(i) for i in df['Region'].unique()],'north',id='regionInput'),
+        dcc.RadioItems(items,'north',id='regionInput'),
     ],style={
         "display":"flex",
         "alignItems":"center",
@@ -40,8 +42,11 @@ app.layout = html.Div(children=[
     Output("visualiser", "figure"),
     Input("regionInput", "value"))
 def update_graph(selected_region):
-    filtered_df = df[df['Region'] == selected_region]
-    fig = px.line(filtered_df, x="Date", y="Sales")
+    if selected_region == "all":
+        filtered_df = df.copy()
+    else:
+        filtered_df = df[df['Region'] == selected_region]
+    fig = px.line(filtered_df, x="Date", y="Sales",color="Region")
     fig.update_layout(
         transition_duration=500,
         paper_bgcolor="rgba(0,0,0,0)",
