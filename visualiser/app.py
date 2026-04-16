@@ -1,8 +1,18 @@
+import sys
+import os
+from pathlib import Path
+
 from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
 import plotly.express as px
 
-df = pd.read_csv("../data/cleandata.csv")
+try:
+    # Get the absolute path to the cleandata.csv file
+    current_dir = Path(__file__).parent
+    data_path = current_dir.parent / "data" / "cleandata.csv"
+    df = pd.read_csv(data_path)
+except FileNotFoundError:
+    sys.exit()
 items = [str(i) for i in df['Region'].unique()]
 items.append("all")
 app = Dash()
@@ -16,7 +26,7 @@ app.layout = html.Div(children=[
     html.Div(children=[
         html.H1(
             "Pink Morsel Sales",
-            id="title",
+            id="header",
             style={"textAlign": "center", "color": "#4A80F0"}),
         dcc.Graph(id="visualiser")
     ],style={"flex": 1,"backgroundColor": "#746980"}),
@@ -46,7 +56,7 @@ def update_graph(selected_region):
         filtered_df = df.copy()
     else:
         filtered_df = df[df['Region'] == selected_region]
-    fig = px.line(filtered_df, x="Date", y="Sales",color="Region")
+    fig = px.line(filtered_df, x="Date", y="Sales",color="Region",title="Pink Morsel Sales")
     fig.update_layout(
         transition_duration=500,
         paper_bgcolor="rgba(0,0,0,0)",
